@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 export default function Checkout() {
   const { cart, getTotalPrice, clearCart } = useCart();
@@ -42,19 +43,45 @@ export default function Checkout() {
       return;
     }
 
-    // Simulate order placement
-    setTimeout(() => {
-      const newOrderId = `ORD-${Date.now()}`;
-      setOrderId(newOrderId);
-      setOrderPlaced(true);
-      setLoading(false);
+    try {
+      const token = localStorage.getItem("token");
+      
+      // Normalize prices for backend (ensure they're numbers)
+      const normalizedItems = cart.map(item => ({
+        ...item,
+        price: typeof item.price === 'string' ? parseFloat(item.price.replace('$', '')) : item.price
+      }));
+      
+      const response = await axios.post(
+        "http://localhost:5000/api/orders",
+        {
+          phone,
+          items: normalizedItems,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      // Clear cart after successful order
-      setTimeout(() => {
-        clearCart();
-        navigate("/");
-      }, 3000);
-    }, 1000);
+      if (response.data.success) {
+        setOrderId(response.data.data.order_number);
+        setOrderPlaced(true);
+        setLoading(false);
+
+        // Clear cart after successful order
+        setTimeout(() => {
+          clearCart();
+          navigate("/");
+        }, 3000);
+      }
+    } catch (err) {
+      console.error("Order error:", err);
+      setError(err.response?.data?.message || "Failed to place order. Please try again.");
+      setLoading(false);
+    }
   };
 
   if (orderPlaced) {
@@ -91,8 +118,9 @@ export default function Checkout() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
       {/* Header */}
       <nav className="flex justify-between items-center p-6 border-b border-gray-700">
-        <Link to="/" className="text-4xl hover:scale-110 transition" title="Home">
-          🏠
+        <Link to="/" className="flex items-center gap-2 text-xl font-semibold hover:scale-105 transition" title="Home">
+          <span className="text-2xl">🏡</span>
+          <span>Home</span>
         </Link>
         <Link to="/" className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
           👗 StyleHub

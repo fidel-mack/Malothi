@@ -22,8 +22,9 @@ export default function FormalWear() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
       {/* Header */}
       <nav className="flex justify-between items-center p-6 border-b border-gray-700">
-        <Link to="/" className="text-4xl hover:scale-110 transition" title="Home">
-          🏠
+        <Link to="/" className="flex items-center gap-2 text-xl font-semibold hover:scale-105 transition" title="Home">
+          <span className="text-2xl">🏡</span>
+          <span>Home</span>
         </Link>
         <Link to="/" className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
           👗 StyleHub

@@ -5,9 +5,11 @@ require("dotenv").config();
 const User = require("./models/User");
 const Product = require("./models/Product");
 const Order = require("./models/Order");
+const Notification = require("./models/Notification");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -25,6 +27,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 /* TEST ROUTE */
 app.get("/", (req, res) => {
@@ -36,6 +39,7 @@ const initDB = async () => {
   await User.initTable();
   await Product.initTable();
   await Order.initTable();
+  await Notification.initTable();
 };
 
 initDB().catch(err => console.error("DB Init Error:", err));

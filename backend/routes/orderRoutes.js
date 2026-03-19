@@ -1,5 +1,7 @@
 const express = require("express");
 const Order = require("../models/Order");
+const Product = require("../models/Product");
+const Notification = require("../models/Notification");
 const { authMiddleware } = require("../middleware/auth");
 const { ApiResponse } = require("../middleware/apiResponse");
 
@@ -11,6 +13,11 @@ router.post("/", authMiddleware, async (req, res) => {
     const { phone, items } = req.body;
     const user_id = req.user.id;
 
+    console.log("📥 Order Request Received:");
+    console.log("  User ID:", user_id);
+    console.log("  Phone:", phone);
+    console.log("  Items:", JSON.stringify(items, null, 2));
+
     if (!phone || !items || items.length === 0) {
       return res.status(400).json(
         new ApiResponse(400, null, "Missing required fields", false)
@@ -19,8 +26,15 @@ router.post("/", authMiddleware, async (req, res) => {
 
     // Calculate total amount
     const total_amount = items.reduce((total, item) => {
-      return total + (parseFloat(item.price.replace("$", "")) * item.quantity);
+      const price = typeof item.price === 'string' 
+        ? parseFloat(item.price.replace("$", "")) 
+        : parseFloat(item.price);
+      const quantity = parseInt(item.quantity) || 1;
+      console.log(`  Item: ${item.name}, Price: ${price}, Qty: ${quantity}, Subtotal: ${price * quantity}`);
+      return total + (price * quantity);
     }, 0);
+
+    console.log("  Total (before tax):", total_amount);
 
     // Add tax (10%)
     const final_amount = (total_amount * 1.1).toFixed(2);
@@ -28,21 +42,52 @@ router.post("/", authMiddleware, async (req, res) => {
     // Generate order number
     const order_number = `ORD-${Date.now()}`;
 
+    // Collect unique store owners from items (with fallback for missing store_owner_id)
+    const store_owner_ids = [];
+    for (const item of items) {
+      // If item has store_owner_id, use it; otherwise we can't assign to a store owner
+      if (item.store_owner_id && !store_owner_ids.includes(item.store_owner_id)) {
+        store_owner_ids.push(item.store_owner_id);
+      }
+    }
+    
+    console.log("  Store Owner IDs:", store_owner_ids);
+
     const order = await Order.create({
       order_number,
       user_id,
       total_amount: final_amount,
       phone,
       items,
+      store_owner_ids,
     });
+
+    console.log("✅ Order created:", order.order_number);
+
+    // Create notifications for each store owner
+    if (store_owner_ids.length > 0) {
+      for (const store_owner_id of store_owner_ids) {
+        await Notification.create({
+          user_id: store_owner_id,
+          order_id: order.id,
+          type: "new_order",
+          title: "New Order Received",
+          message: `You have a new order #${order_number} for $${final_amount}`,
+        });
+      }
+      console.log(`✅ Notifications sent to ${store_owner_ids.length} store owners`);
+    } else {
+      console.log("⚠️  No store owner IDs in this order");
+    }
 
     return res.status(201).json(
       new ApiResponse(201, order, "Order created successfully", true)
     );
   } catch (err) {
-    console.error(err);
+    console.error("❌ Order Creation Error:", err.message);
+    console.error("Stack:", err.stack);
     return res.status(500).json(
-      new ApiResponse(500, null, "Server error", false)
+      new ApiResponse(500, null, err.message || "Server error", false)
     );
   }
 });

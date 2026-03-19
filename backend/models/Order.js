@@ -3,6 +3,9 @@ const { pool } = require("../config/database");
 const Order = {
   async initTable() {
     try {
+      // Drop existing table if it exists
+      await pool.query(`DROP TABLE IF EXISTS orders CASCADE`);
+      
       await pool.query(`
         CREATE TABLE IF NOT EXISTS orders (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -12,6 +15,7 @@ const Order = {
           phone VARCHAR(20) NOT NULL,
           status VARCHAR(50) DEFAULT 'pending',
           items JSONB NOT NULL,
+          store_owner_ids UUID[] DEFAULT '{}',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -22,12 +26,12 @@ const Order = {
     }
   },
 
-  async create({ order_number, user_id, total_amount, phone, items }) {
+  async create({ order_number, user_id, total_amount, phone, items, store_owner_ids = [] }) {
     const result = await pool.query(
-      `INSERT INTO orders (order_number, user_id, total_amount, phone, items, status)
-       VALUES ($1, $2, $3, $4, $5, 'confirmed')
+      `INSERT INTO orders (order_number, user_id, total_amount, phone, items, store_owner_ids, status)
+       VALUES ($1, $2, $3, $4, $5, $6, 'confirmed')
        RETURNING *`,
-      [order_number, user_id, total_amount, phone, JSON.stringify(items)]
+      [order_number, user_id, total_amount, phone, JSON.stringify(items), store_owner_ids]
     );
     return result.rows[0];
   },
@@ -85,11 +89,10 @@ const Order = {
   },
 
   async getByStoreOwnerId(store_owner_id) {
-    // Get all orders (store owner can view orders for their products)
-    // In a more advanced system, you'd track which products are in each order
+    // Get all orders that contain products from this store owner
     const result = await pool.query(
-      `SELECT * FROM orders ORDER BY created_at DESC LIMIT 100`,
-      []
+      `SELECT * FROM orders WHERE $1 = ANY(store_owner_ids) ORDER BY created_at DESC LIMIT 100`,
+      [store_owner_id]
     );
     return result.rows;
   },

@@ -3,6 +3,9 @@ const { pool } = require("../config/database");
 const Product = {
   async initTable() {
     try {
+      // Drop existing table to ensure fresh schema
+      await pool.query(`DROP TABLE IF EXISTS products CASCADE`);
+      
       await pool.query(`
         CREATE TABLE IF NOT EXISTS products (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -37,7 +40,7 @@ const Product = {
 
   async getAll() {
     const result = await pool.query(
-      `SELECT id, name, description, price, category, stock, image_url, rating, reviews_count, created_at 
+      `SELECT id, name, description, price, category, stock, image_url, store_owner_id, rating, reviews_count, created_at 
        FROM products WHERE stock > 0 ORDER BY created_at DESC`
     );
     return result.rows;
@@ -53,7 +56,7 @@ const Product = {
 
   async getByCategory(category) {
     const result = await pool.query(
-      `SELECT id, name, description, price, category, stock, image_url, rating, reviews_count
+      `SELECT id, name, description, price, category, stock, image_url, store_owner_id, rating, reviews_count
        FROM products WHERE category = $1 AND stock > 0 ORDER BY created_at DESC`,
       [category]
     );
@@ -106,7 +109,7 @@ const Product = {
 
   async search(searchTerm) {
     const result = await pool.query(
-      `SELECT id, name, description, price, category, stock, image_url, rating, reviews_count
+      `SELECT id, name, description, price, category, stock, image_url, store_owner_id, rating, reviews_count
        FROM products WHERE name ILIKE $1 OR description ILIKE $1 AND stock > 0
        ORDER BY created_at DESC`,
       [`%${searchTerm}%`]
