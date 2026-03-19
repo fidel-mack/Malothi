@@ -3,9 +3,6 @@ const { pool } = require("../config/database");
 const Order = {
   async initTable() {
     try {
-      // Drop existing table if it exists
-      await pool.query(`DROP TABLE IF EXISTS orders CASCADE`);
-      
       await pool.query(`
         CREATE TABLE IF NOT EXISTS orders (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

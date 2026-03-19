@@ -3,9 +3,7 @@ const { pool } = require("../config/database");
 const Product = {
   async initTable() {
     try {
-      // Drop existing table to ensure fresh schema
-      await pool.query(`DROP TABLE IF EXISTS products CASCADE`);
-      
+      // Create table if not exists (don't drop)
       await pool.query(`
         CREATE TABLE IF NOT EXISTS products (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -23,6 +21,20 @@ const Product = {
         )
       `);
       console.log("✅ Products table ready");
+
+      // Add sample products if table is empty
+      const countResult = await pool.query(`SELECT COUNT(*) FROM products`);
+      if (parseInt(countResult.rows[0].count) === 0) {
+        await pool.query(`
+          INSERT INTO products (name, description, price, category, stock, image_url, store_owner_id) VALUES
+          ('Casual Sundress', 'Light and breezy sundress perfect for summer', 49.99, 'dresses', 10, 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400', 'sample-owner-1'),
+          ('Maxi Dress', 'Elegant maxi dress for formal occasions', 79.99, 'dresses', 5, 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400', 'sample-owner-1'),
+          ('Running Shoes', 'Comfortable running shoes for athletes', 89.99, 'shoes', 15, 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400', 'sample-owner-2'),
+          ('Formal Blazer', 'Classic blazer for business attire', 129.99, 'formal_wear', 8, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400', 'sample-owner-2'),
+          ('Cotton Socks Pack', 'Soft cotton socks, 5-pack', 19.99, 'socks', 20, 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=400', 'sample-owner-3')
+        `);
+        console.log("✅ Sample products added");
+      }
     } catch (error) {
       console.error("❌ Product table error:", error.message);
     }

@@ -81,7 +81,7 @@ export default function Home() {
           <span className="text-2xl">🏡</span>
           <span>Home</span>
         </Link>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
           👗 StyleHub
         </h1>
         <div className="flex gap-4 items-center">
@@ -559,8 +559,112 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-700 py-8 px-6 text-center text-gray-500">
-        <p>&copy; 2026 StyleHub. All rights reserved. | Elevating Fashion</p>
+      <footer className="border-t border-gray-700 py-12 px-6 bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          {/* Footer Links */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            {/* Company */}
+            <div>
+              <h4 className="text-white font-bold text-lg mb-4">Company</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#about" className="text-gray-400 hover:text-white transition">
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#contact" className="text-gray-400 hover:text-white transition">
+                    Contact Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#careers" className="text-gray-400 hover:text-white transition">
+                    Careers
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="text-white font-bold text-lg mb-4">Legal</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#privacy" className="text-gray-400 hover:text-white transition">
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="#terms" className="text-gray-400 hover:text-white transition">
+                    Terms of Service
+                  </a>
+                </li>
+                <li>
+                  <a href="#cookies" className="text-gray-400 hover:text-white transition">
+                    Cookie Policy
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Follow Us */}
+            <div>
+              <h4 className="text-white font-bold text-lg mb-4">Follow Us</h4>
+              <div className="flex justify-center md:justify-start gap-6">
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-blue-500 transition"
+                  title="Facebook"
+                >
+                  📘
+                </a>
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-pink-500 transition"
+                  title="Instagram"
+                >
+                  📷
+                </a>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-blue-400 transition"
+                  title="Twitter"
+                >
+                  𝕏
+                </a>
+                <a
+                  href="https://tiktok.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-gray-300 transition"
+                  title="TikTok"
+                >
+                  🎵
+                </a>
+                <a
+                  href="https://youtube.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-red-500 transition"
+                  title="YouTube"
+                >
+                  ▶️
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
+            <p>&copy; 2026 StyleHub. All rights reserved. | Elevating Fashion Every Day</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
